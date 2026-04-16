@@ -1,230 +1,223 @@
 'use client';
-
 import { useState, useRef, useEffect } from 'react';
 
+const QUICK_QUESTIONS = [
+  'ধান চাষে কোন সার ব্যবহার করব?',
+  'টমেটোতে পোকা দমন করব কিভাবে?',
+  'জৈব সার কিভাবে তৈরি করব?',
+  'মাছ চাষে পানির pH কত হওয়া উচিত?',
+];
+
+const CATEGORY_ICONS = {
+  crop:       '🌾', soil:       '🪱', pest:       '🐛',
+  disease:    '🦠', fertilizer: '🧪', irrigation: '💧',
+  livestock:  '🐄', fishery:    '🐟', weather:    '⛅',
+  equipment:  '🚜', market:     '💰', organic:    '🌿',
+  other:      '🌱', 'non-agro': '❌',
+};
+
 export default function Home() {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: 'bot',
-      text: '🌾 আসসালামু আলাইকুম! আমি AgroBot, আপনার কৃষি পরামর্শক।\n\nআমাকে জিজ্ঞাসা করুন:\n• ফসল চাষ সম্পর্কে\n• সার ও কীটনাশক\n• পোকামাকড় দমন\n• আবহাওয়া ও সেচ\n• গবাদি পশু ও মাছ চাষ\n\nকিভাবে সাহায্য করতে পারি?',
-      time: new Date()
-    }
-  ]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [messages, setMessages]   = useState([{
+    id: 1, role: 'bot',
+    text: '🌾 আসসালামু আলাইকুম! আমি AgroBot, আপনার কৃষি পরামর্শক।\n\nযেকোনো কৃষি প্রশ্ন করুন — ফসল, গাছ, পশু, মাছ, সার, রোগ, আবহাওয়া — সব বিষয়ে সাহায্য করব।\n\nHow can I help you today?',
+    tips: [], followUp: [], category: 'other',
+  }]);
+  const [input, setInput]         = useState('');
+  const [loading, setLoading]     = useState(false);
   const [remaining, setRemaining] = useState({ hourly: 10, daily: 100 });
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
+  const bottomRef                 = useRef(null);
+  const textareaRef               = useRef(null);
 
-  // Scroll to bottom on new messages
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
-  // Generate session ID
-  const getSessionId = () => {
-    if (typeof window === 'undefined') return 'ssr';
-    let id = localStorage.getItem('agrobot_session');
-    if (!id) {
-      id = 'web_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('agrobot_session', id);
-    }
-    return id;
-  };
-
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
-
-    const userMessage = {
-      id: Date.now(),
-      sender: 'user',
-      text: input.trim(),
-      time: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
+  async function sendMessage(text) {
+    const q = (text || input).trim();
+    if (!q || loading) return;
     setInput('');
+
+    const userMsg = { id: Date.now(), role: 'user', text: q };
+    setMessages(prev => [...prev, userMsg]);
     setLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
+      const res  = await fetch('/api/chat', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: userMessage.text,
-          userId: getSessionId(),
-          platform: 'web'
-        })
+        body:    JSON.stringify({ question: q, userId: getOrCreateUserId() }),
       });
+      const data = await res.json();
 
-      const data = await response.json();
+      if (data.remaining) setRemaining(data.remaining);
 
-      const botMessage = {
-        id: Date.now() + 1,
-        sender: 'bot',
-        text: data.response || 'দুঃখিত, একটি সমস্যা হয়েছে।',
-        time: new Date(),
-        cached: data.cached,
-        isAgro: data.isAgro
-      };
-
-      setMessages(prev => [...prev, botMessage]);
-      
-      if (data.remaining) {
-        setRemaining(data.remaining);
-      }
-
-    } catch (error) {
-      console.error('Error:', error);
       setMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        sender: 'bot',
-        text: '🔧 দুঃখিত, সংযোগে সমস্যা হয়েছে। আবার চেষ্টা করুন।',
-        time: new Date()
+        id:       Date.now() + 1,
+        role:     'bot',
+        text:     data.response || '🔧 কোনো সমস্যা হয়েছে। আবার চেষ্টা করুন।',
+        tips:     data.tips     || [],
+        followUp: data.followUp || [],
+        category: data.category || 'other',
+        cached:   data.cached,
+        isAgro:   data.isAgro,
+      }]);
+    } catch {
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1, role: 'bot',
+        text: '🔧 নেটওয়ার্ক সমস্যা। ইন্টারনেট চেক করে আবার চেষ্টা করুন।',
+        tips: [], followUp: [], category: 'other',
       }]);
     } finally {
       setLoading(false);
-      inputRef.current?.focus();
     }
-  };
+  }
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
+  function getOrCreateUserId() {
+    if (typeof window === 'undefined') return 'anon';
+    let uid = localStorage.getItem('agro_uid');
+    if (!uid) { uid = 'web_' + Math.random().toString(36).slice(2); localStorage.setItem('agro_uid', uid); }
+    return uid;
+  }
 
-  // Quick questions
-  const quickQuestions = [
-    'ধান চাষে কোন সার ব্যবহার করব?',
-    'টমেটোতে পোকা দমন করব কিভাবে?',
-    'জৈব সার কিভাবে তৈরি করব?',
-    'মাছ চাষে পানির pH কত হওয়া উচিত?'
-  ];
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex flex-col">
+
       {/* Header */}
-      <header className="gradient-bg text-white py-4 px-6 shadow-lg">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <header className="bg-gradient-to-r from-green-700 to-emerald-600 text-white py-3 px-4 shadow-lg sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">
-              🌾
-            </div>
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-xl">🌾</div>
             <div>
-              <h1 className="text-xl font-bold">AgroBot AI</h1>
-              <p className="text-sm text-green-100">আপনার কৃষি পরামর্শক</p>
+              <h1 className="text-lg font-bold leading-tight">AgroBot AI</h1>
+              <p className="text-xs text-green-100">আপনার কৃষি পরামর্শক</p>
             </div>
           </div>
-          <div className="text-right text-sm">
-            <div className="text-green-100">আজকের প্রশ্ন বাকি</div>
-            <div className="font-bold">{remaining.daily} টি</div>
+          <div className="text-right text-xs">
+            <div className="text-green-200">আজকের প্রশ্ন বাকি</div>
+            <div className="font-bold text-base">{remaining.daily} টি</div>
           </div>
         </div>
       </header>
 
-      {/* Chat Container */}
-      <main className="max-w-4xl mx-auto p-4">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          
-          {/* Messages Area */}
-          <div className="h-[60vh] overflow-y-auto p-4 space-y-4 bg-gray-50">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`message-bubble flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                    msg.sender === 'user'
-                      ? 'bg-green-600 text-white rounded-br-md'
-                      : 'bg-white border border-gray-200 text-gray-800 rounded-bl-md shadow-sm'
-                  }`}
-                >
-                  <p className="whitespace-pre-wrap">{msg.text}</p>
-                  <div className={`text-xs mt-1 ${msg.sender === 'user' ? 'text-green-200' : 'text-gray-400'}`}>
-                    {msg.time.toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' })}
-                    {msg.cached && ' • ⚡ ক্যাশড'}
-                  </div>
-                </div>
-              </div>
-            ))}
+      {/* Messages */}
+      <main className="flex-1 max-w-2xl w-full mx-auto px-3 py-4 flex flex-col gap-3 pb-36">
 
-            {/* Typing Indicator */}
-            {loading && (
-              <div className="flex justify-start">
-                <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
-                  <div className="flex gap-1">
-                    <div className="typing-dot w-2 h-2 bg-green-500 rounded-full"></div>
-                    <div className="typing-dot w-2 h-2 bg-green-500 rounded-full"></div>
-                    <div className="typing-dot w-2 h-2 bg-green-500 rounded-full"></div>
-                  </div>
+        {messages.map(msg => (
+          <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            {msg.role === 'bot' ? (
+              <div className="max-w-[92%] flex flex-col gap-2">
+                {/* Main bubble */}
+                <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100">
+                  {msg.category && msg.category !== 'other' && msg.isAgro !== false && (
+                    <div className="flex items-center gap-1 mb-2 text-xs text-green-700 font-medium">
+                      <span>{CATEGORY_ICONS[msg.category] || '🌱'}</span>
+                      <span className="capitalize">{msg.category}</span>
+                      {msg.cached && <span className="ml-auto text-gray-400 text-[10px]">⚡ cached</span>}
+                    </div>
+                  )}
+                  <p className="text-gray-800 text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                 </div>
+
+                {/* Tips */}
+                {msg.tips?.length > 0 && (
+                  <div className="bg-green-50 border border-green-200 rounded-xl px-3 py-2">
+                    <p className="text-xs font-semibold text-green-700 mb-1">💡 টিপস:</p>
+                    <ul className="space-y-1">
+                      {msg.tips.map((tip, i) => (
+                        <li key={i} className="text-xs text-green-800 flex gap-1">
+                          <span className="text-green-500 mt-0.5">✓</span>
+                          <span>{tip}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Follow-up questions */}
+                {msg.followUp?.length > 0 && (
+                  <div className="flex flex-col gap-1">
+                    <p className="text-[11px] text-gray-500 px-1">আরও জানতে চান?</p>
+                    {msg.followUp.map((q, i) => (
+                      <button
+                        key={i}
+                        onClick={() => sendMessage(q)}
+                        className="text-left text-xs bg-white border border-green-200 text-green-700 px-3 py-2 rounded-xl hover:bg-green-50 active:bg-green-100 transition-colors shadow-sm"
+                      >
+                        ↩ {q}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="max-w-[80%] bg-green-600 text-white rounded-2xl rounded-br-sm px-4 py-3 shadow-sm">
+                <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
               </div>
             )}
-
-            <div ref={messagesEndRef} />
           </div>
+        ))}
 
-          {/* Quick Questions */}
-          {messages.length <= 2 && (
-            <div className="px-4 py-3 bg-green-50 border-t border-green-100">
-              <p className="text-sm text-green-700 mb-2">🎯 দ্রুত প্রশ্ন করুন:</p>
-              <div className="flex flex-wrap gap-2">
-                {quickQuestions.map((q, i) => (
-                  <button
-                    key={i}
-                    onClick={() => { setInput(q); inputRef.current?.focus(); }}
-                    className="text-sm bg-white border border-green-200 text-green-700 px-3 py-1.5 rounded-full hover:bg-green-100 transition-colors"
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
+        {/* Typing indicator */}
+        {loading && (
+          <div className="flex justify-start">
+            <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100 flex gap-1 items-center">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{animationDelay:'0ms'}}/>
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{animationDelay:'150ms'}}/>
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{animationDelay:'300ms'}}/>
+            </div>
+          </div>
+        )}
+
+        <div ref={bottomRef} />
+      </main>
+
+      {/* Input area — fixed at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
+        <div className="max-w-2xl mx-auto px-3 py-2">
+
+          {/* Quick questions (only at start) */}
+          {messages.length <= 1 && (
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {QUICK_QUESTIONS.map((q, i) => (
+                <button key={i} onClick={() => sendMessage(q)}
+                  className="flex-none text-xs bg-green-50 border border-green-200 text-green-700 px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-green-100 transition-colors">
+                  {q}
+                </button>
+              ))}
             </div>
           )}
 
-          {/* Input Area */}
-          <div className="p-4 bg-white border-t border-gray-100">
-            <div className="flex gap-3">
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder="আপনার কৃষি সম্পর্কিত প্রশ্ন লিখুন..."
-                className="flex-1 resize-none border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                rows={1}
-                disabled={loading}
-              />
-              <button
-                onClick={sendMessage}
-                disabled={loading || !input.trim()}
-                className="px-6 py-3 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-              >
-                {loading ? (
-                  <span className="animate-spin">⏳</span>
-                ) : (
-                  <>
-                    <span>পাঠান</span>
-                    <span>→</span>
-                  </>
-                )}
-              </button>
-            </div>
-            <p className="text-xs text-gray-400 mt-2 text-center">
-              AgroBot শুধুমাত্র কৃষি সম্পর্কিত প্রশ্নের উত্তর দেয় 🌱
-            </p>
+          <div className="flex gap-2 items-end">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKey}
+              placeholder="আপনার যেকোনো কৃষি প্রশ্ন লিখুন..."
+              rows={1}
+              className="flex-1 resize-none border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent max-h-28 overflow-y-auto"
+              style={{lineHeight:'1.4'}}
+              onInput={e => {
+                e.target.style.height = 'auto';
+                e.target.style.height = Math.min(e.target.scrollHeight, 112) + 'px';
+              }}
+            />
+            <button
+              onClick={() => sendMessage()}
+              disabled={loading || !input.trim()}
+              className="px-4 py-2.5 bg-green-600 text-white rounded-xl font-medium text-sm hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex-none"
+            >
+              {loading ? '...' : '➤'}
+            </button>
           </div>
+          <p className="text-[10px] text-gray-400 text-center mt-1">
+            AgroBot — Powered by agro.com.bd 🌱
+          </p>
         </div>
+      </div>
 
-        {/* Footer */}
-        <footer className="text-center mt-6 text-sm text-gray-500">
-          <p>Powered by <span className="text-green-600 font-medium">agro.com.bd</span></p>
-        </footer>
-      </main>
     </div>
   );
 }
