@@ -28,6 +28,18 @@ export default function Home() {
   const bottomRef   = useRef(null);
   const textRef     = useRef(null);
 
+  // ── Fetch real quota from server on load & on tab switch ──
+  useEffect(() => {
+    const uid = getOrCreateUserId();
+    fetch(`/api/status?userId=${uid}&chatType=${chatType}`)
+      .then(r => r.json())
+      .then(d => {
+        setRemaining(d.remaining ?? 15);
+        setLimitInfo({ bonusGranted: d.bonusGranted || false, isBonus: d.isBonus || false });
+      })
+      .catch(() => {}); // silently fail — state stays at default 15
+  }, [chatType]);
+
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   // Switch chat type — reset messages
