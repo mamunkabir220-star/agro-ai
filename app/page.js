@@ -62,6 +62,107 @@ const WELCOME = {
 const AGRO_QUICK    = ['ধান চাষে কোন সার দেব?', 'টমেটোতে পোকা দমন?', 'জৈব সার তৈরির উপায়?', 'মাছ চাষে pH কত হওয়া উচিত?'];
 const PRODUCT_QUICK = ['ধানের জন্য সেরা সার?', 'কীটনাশক কিনতে চাই', 'সেচ পাম্প দরকার', 'বীজ কোথায় পাব?'];
 
+// ── Animated chat demo for landing page ──
+function AnimatedChatCard() {
+  const CONVOS = [
+    { q: 'মাছের পুকুরে pH কত রাখব?',       a: 'পুকুরের pH ৭.০–৮.৫ এর মধ্যে রাখা আদর্শ।',                   tips: ['নিয়মিত pH পরীক্ষা করুন', 'প্রয়োজনে চুন প্রয়োগ করুন'] },
+    { q: 'ধান পাতায় হলুদ রং কেন?',         a: 'নাইট্রোজেনের অভাবে পাতা হলুদ হয়। ইউরিয়া সার দিন।',      tips: ['বিকেলে সার প্রয়োগ করুন', 'সেচের পর দিন'] },
+    { q: 'টমেটোতে পোকা দমন করব কীভাবে?',  a: 'নিম তেল বা অনুমোদিত কীটনাশক স্প্রে করুন।',              tips: ['ভোরে স্প্রে করুন', 'ফুলের সময় এড়িয়ে চলুন'] },
+  ];
+
+  const [ci, setCi]           = useState(0);
+  const [userText, setUserText] = useState('');
+  const [botText, setBotText]   = useState('');
+  const [showDots, setShowDots] = useState(false);
+  const [showTip, setShowTip]   = useState(false);
+  const [fade, setFade]         = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const convo = CONVOS[ci];
+    setUserText(''); setBotText(''); setShowDots(false); setShowTip(false); setFade(false);
+
+    const delay = ms => new Promise(r => setTimeout(r, ms));
+
+    async function run() {
+      await delay(1000); if (cancelled) return;
+      for (let i = 1; i <= convo.q.length; i++) {
+        if (cancelled) return;
+        setUserText(convo.q.slice(0, i));
+        await delay(55);
+      }
+      await delay(400); if (cancelled) return;
+      setShowDots(true);
+      await delay(1200); if (cancelled) return;
+      setShowDots(false);
+      for (let i = 1; i <= convo.a.length; i++) {
+        if (cancelled) return;
+        setBotText(convo.a.slice(0, i));
+        await delay(30);
+      }
+      await delay(300); if (cancelled) return;
+      setShowTip(true);
+      await delay(2500); if (cancelled) return;
+      setFade(true);
+      await delay(600); if (cancelled) return;
+      setCi(prev => (prev + 1) % CONVOS.length);
+    }
+    run();
+    return () => { cancelled = true; };
+  }, [ci]);
+
+  const convo = CONVOS[ci];
+
+  return (
+    <div className={`mx-auto max-w-md rounded-2xl border border-green-200 bg-white shadow-xl overflow-hidden mb-8 text-left transition-opacity duration-500 ${fade ? 'opacity-0' : 'opacity-100'}`}>
+      <div className="flex items-center gap-2 bg-green-700 px-4 py-2.5">
+        <span className="h-3 w-3 rounded-full bg-red-400" />
+        <span className="h-3 w-3 rounded-full bg-yellow-400" />
+        <span className="h-3 w-3 rounded-full bg-green-400" />
+        <span className="ml-2 text-xs font-semibold text-white">🌾 Agro Assistant</span>
+      </div>
+      <div className="p-4 space-y-3 min-h-[210px]">
+        <div className="flex justify-start">
+          <div className="bg-gray-100 text-gray-700 text-xs rounded-2xl rounded-bl-none px-3 py-2 max-w-[75%]">
+            আমি Agro Assistant। আপনার কৃষি প্রশ্ন করুন।
+          </div>
+        </div>
+        {userText && (
+          <div className="flex justify-end">
+            <div className="bg-green-600 text-white text-xs rounded-2xl rounded-br-none px-3 py-2 max-w-[75%]">
+              {userText}{userText.length < convo.q.length && <span className="opacity-60">|</span>}
+            </div>
+          </div>
+        )}
+        {showDots && (
+          <div className="flex justify-start">
+            <div className="bg-gray-100 rounded-2xl rounded-bl-none px-3 py-2 flex gap-1 items-center">
+              {[0,150,300].map(d => <span key={d} className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{animationDelay:`${d}ms`}} />)}
+            </div>
+          </div>
+        )}
+        {botText && (
+          <div className="flex justify-start">
+            <div className="bg-gray-100 text-gray-700 text-xs rounded-2xl rounded-bl-none px-3 py-2 max-w-[85%]">
+              {botText}{botText.length < convo.a.length && <span className="opacity-60">|</span>}
+            </div>
+          </div>
+        )}
+        {showTip && (
+          <div className="bg-green-50 border border-green-200 rounded-xl px-3 py-2 text-xs text-green-800">
+            <p className="font-semibold mb-1">💡 টিপস:</p>
+            {convo.tips.map((t, i) => <p key={i}>✓ {t}</p>)}
+          </div>
+        )}
+        <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2">
+          <span className="flex-1 text-xs text-gray-400">আপনার কৃষি প্রশ্ন লিখুন...</span>
+          <div className="h-6 w-6 flex items-center justify-center rounded-lg bg-green-600 text-white text-xs">➤</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Landing Page ──
 function LandingPage() {
   const features = [
@@ -102,41 +203,8 @@ function LandingPage() {
           আপনার সমস্যা বলুন,<br/>সমাধান পান মুহূতেই
         </h1>
 
-        {/* Mock chat card */}
-        <div className="mx-auto max-w-md rounded-2xl border border-green-200 bg-white shadow-xl overflow-hidden mb-8 text-left">
-          <div className="flex items-center gap-2 bg-green-700 px-4 py-2.5">
-            <span className="h-3 w-3 rounded-full bg-red-400" />
-            <span className="h-3 w-3 rounded-full bg-yellow-400" />
-            <span className="h-3 w-3 rounded-full bg-green-400" />
-            <span className="ml-2 text-xs font-semibold text-white">🌾 Agro Assistant</span>
-          </div>
-          <div className="p-4 space-y-3">
-            <div className="flex justify-start">
-              <div className="bg-gray-100 text-gray-700 text-xs rounded-2xl rounded-bl-none px-3 py-2 max-w-[75%]">
-                আমি Agro Assistant। আপনার কৃষি প্রশ্ন করুন।
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <div className="bg-green-600 text-white text-xs rounded-2xl rounded-br-none px-3 py-2 max-w-[75%]">
-                মাছের পুকুরে pH কত রাখব?
-              </div>
-            </div>
-            <div className="flex justify-start">
-              <div className="bg-gray-100 text-gray-700 text-xs rounded-2xl rounded-bl-none px-3 py-2 max-w-[85%]">
-                মাছ চাষের জন্য পুকুরের pH ৭.০ থেকে ৮.৫ এর মধ্যে রাখা আদর্শ।
-              </div>
-            </div>
-            <div className="bg-green-50 border border-green-200 rounded-xl px-3 py-2 text-xs text-green-800">
-              <p className="font-semibold mb-1">💡 টিপস:</p>
-              <p>✓ নিয়মিত pH পরীক্ষা করুন</p>
-              <p>✓ প্রয়োজনে চুন প্রয়োগ করুন</p>
-            </div>
-            <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2">
-              <input className="flex-1 text-xs text-gray-400 bg-transparent outline-none" placeholder="আপনার কৃষি প্রশ্ন লিখুন..." readOnly />
-              <div className="h-6 w-6 flex items-center justify-center rounded-lg bg-green-600 text-white text-xs">➤</div>
-            </div>
-          </div>
-        </div>
+        {/* Animated chat demo */}
+        <AnimatedChatCard />
 
         <p className="text-sm text-gray-500 mb-8">
           ফসল, পশু, মাছ, সার, রোগ — যেকোনো কৃষি সমস্যায় তাৎক্ষণিক বিশেষজ্ঞ পরামর্শ পান। বাংলা ও ইংরেজিতে।
@@ -351,6 +419,17 @@ function ChatApp() {
         </div>
 
         <div className="p-3 border-t border-green-700">
+          <a href={AGRO_MAIN_URL}
+            className="flex items-center gap-2 w-full text-xs text-green-300 hover:text-white hover:bg-green-700/60 rounded-lg px-3 py-2 mb-1 transition-colors">
+            <svg className="h-4 w-4 flex-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+            হোম — agro.com.bd
+          </a>
+          <button
+            onClick={() => { localStorage.removeItem('agro_ai_token'); window.location.reload(); }}
+            className="flex items-center gap-2 w-full text-left text-xs text-green-300 hover:text-white hover:bg-red-900/40 rounded-lg px-3 py-2 mb-2 transition-colors">
+            <svg className="h-4 w-4 flex-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            লগআউট
+          </button>
           <div className="bg-green-700/50 rounded-lg p-3">
             <div className="flex justify-between text-xs text-green-300 mb-1">
               <span>আজকের প্রশ্ন</span>
