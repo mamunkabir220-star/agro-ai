@@ -263,6 +263,7 @@ function ChatApp() {
   const [location,    setLocation]    = useState(null);
   const [weather,     setWeather]     = useState(null);
   const [weatherLoad, setWeatherLoad] = useState(false);
+  const [lang,        setLang]        = useState('bn');
 
   const bottomRef = useRef(null);
   const textRef   = useRef(null);
@@ -454,6 +455,17 @@ function ChatApp() {
               <span className="text-xl hidden lg:block">🌾</span>
               <div><h1 className="text-sm font-bold leading-tight">Agro Assistant</h1>{location && <p className="text-[10px] text-green-200">📍 {location.name}</p>}</div>
             </div>
+            <div className="flex items-center gap-1">
+              <a href={AGRO_MAIN_URL} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors" title="Home">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </a>
+              <button onClick={() => setLang(l => l === 'bn' ? 'en' : 'bn')} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors" title="Toggle language">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+              </button>
+              <button onClick={() => { localStorage.removeItem('agro_ai_token'); window.location.reload(); }} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors" title="Logout">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              </button>
+            </div>
             <div className="text-right text-xs">
               <div className="text-green-200">{limitInfo.isBonus ? '⭐ বোনাস' : 'প্রশ্ন বাকি'}</div>
               <div className={`font-bold text-lg leading-none ${remaining <= 3 ? 'text-red-300' : ''}`}>{remaining}</div>
@@ -462,7 +474,6 @@ function ChatApp() {
           <div className="px-4 pb-1"><div className="h-0.5 bg-white/20 rounded-full overflow-hidden"><div className={`h-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} /></div></div>
           <div className="flex gap-2 px-4 pb-2">
             <button onClick={() => switchChat('agro')} className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${chatType==='agro' ? 'bg-white text-green-700 shadow' : 'bg-white/20 hover:bg-white/30'}`}>🌱 কৃষি পরামর্শ</button>
-            <button onClick={() => switchChat('product')} className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${chatType==='product' ? 'bg-white text-green-700 shadow' : 'bg-white/20 hover:bg-white/30'}`}>🛒 পণ্য কিনুন</button>
           </div>
         </header>
 
