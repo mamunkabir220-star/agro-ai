@@ -250,6 +250,73 @@ function LoadingScreen() {
   );
 }
 
+const T = {
+  bn: {
+    newChat: 'নতুন চ্যাট',
+    weatherLoading: 'আবহাওয়া লোড হচ্ছে...',
+    weatherAdvice: '🌱 আবহাওয়া পরামর্শ:',
+    recentQ: 'সাম্প্রতিক প্রশ্ন',
+    noHistory: 'কোনো ইতিহাস নেই',
+    homeLink: 'হোম — agro.com.bd',
+    logout: 'লগআউট',
+    todayQ: 'আজকের প্রশ্ন',
+    bonusMode: (n) => `⭐ বোনাস মোড: ${n} প্রশ্ন বাকি`,
+    qLeft: 'প্রশ্ন বাকি',
+    bonusLabel: '⭐ বোনাস',
+    farmingTab: '🌱 কৃষি পরামর্শ',
+    loadingExtras: 'পণ্য ও সেবা খুঁজছি...',
+    tips: '💡 টিপস:',
+    foundAt: '🛒 agro.com.bd এ পাওয়া যায়:',
+    viewBtn: 'দেখুন →',
+    nearbyServices: '📍 কাছের সরকারি সেবা',
+    readyToOrder: '🎉 অর্ডার করতে প্রস্তুত?',
+    visitSite: '🌐 agro.com.bd এ যান',
+    whatsapp: '💬 WhatsApp এ যোগাযোগ',
+    callNow: '📞 এখনই কল করুন',
+    learnMore: 'আরও জানতে:',
+    bonusGiven: '🎁 ১৫টি প্রশ্ন শেষ! আরও ৫টি বোনাস পেয়েছেন।',
+    nearLimit: (n) => `⚠️ মাত্র ${n}টি প্রশ্ন বাকি।`,
+    placeholder: 'আপনার কৃষি প্রশ্ন লিখুন...',
+    cacheLabel: '⚡ ক্যাশ',
+    deviceCache: '📱 ডিভাইস',
+    langSwitch: 'EN',
+    quickQ: ['ধান চাষে কোন সার দেব?', 'টমেটোতে পোকা দমন?', 'জৈব সার তৈরির উপায়?', 'মাছ চাষে pH কত?'],
+    welcome: '🌾 আসসালামু আলাইকুম! আমি Agro Assistant।\n\nফসল, গাছপালা, পশু, মাছ, সার, রোগ, আবহাওয়া — যেকোনো কৃষি প্রশ্ন করুন।',
+  },
+  en: {
+    newChat: 'New Chat',
+    weatherLoading: 'Loading weather...',
+    weatherAdvice: '🌱 Weather advice:',
+    recentQ: 'Recent Questions',
+    noHistory: 'No history yet',
+    homeLink: 'Home — agro.com.bd',
+    logout: 'Logout',
+    todayQ: "Today's Questions",
+    bonusMode: (n) => `⭐ Bonus mode: ${n} left`,
+    qLeft: 'left',
+    bonusLabel: '⭐ Bonus',
+    farmingTab: '🌱 Farming Advice',
+    loadingExtras: 'Finding products & services...',
+    tips: '💡 Tips:',
+    foundAt: '🛒 Available on agro.com.bd:',
+    viewBtn: 'View →',
+    nearbyServices: '📍 Nearby government services',
+    readyToOrder: '🎉 Ready to order?',
+    visitSite: '🌐 Visit agro.com.bd',
+    whatsapp: '💬 Contact via WhatsApp',
+    callNow: '📞 Call Now',
+    learnMore: 'Learn more:',
+    bonusGiven: '🎁 15 questions done! You got 5 bonus questions.',
+    nearLimit: (n) => `⚠️ Only ${n} questions left.`,
+    placeholder: 'Write your farming question...',
+    cacheLabel: '⚡ Cache',
+    deviceCache: '📱 Device',
+    langSwitch: 'বাং',
+    quickQ: ['Best fertilizer for rice?', 'How to control pests in tomato?', 'How to make organic compost?', 'Ideal pH for fish farming?'],
+    welcome: '🌾 Hello! I am Agro Assistant.\n\nAsk me anything about crops, plants, livestock, fish, fertilizers, diseases, or weather.',
+  },
+};
+
 // ── Chat App (full chat UI) ──
 function ChatApp() {
   const [chatType,    setChatType]    = useState('agro');
@@ -264,6 +331,7 @@ function ChatApp() {
   const [weather,     setWeather]     = useState(null);
   const [weatherLoad, setWeatherLoad] = useState(false);
   const [lang,        setLang]        = useState('bn');
+  const t = T[lang];
 
   const bottomRef = useRef(null);
   const textRef   = useRef(null);
@@ -351,7 +419,7 @@ function ChatApp() {
   function switchChat(type) {
     if (type === chatType) return;
     setChatType(type);
-    setMessages([{ id: Date.now(), role: 'bot', text: WELCOME[type], tips: [], followUp: [], category: type === 'product' ? 'product' : 'other' }]);
+    setMessages([{ id: Date.now(), role: 'bot', text: T[lang].welcome, tips: [], followUp: [], category: 'other' }]);
     setInput('');
   }
 
@@ -376,7 +444,7 @@ function ChatApp() {
 
         <div className="p-3 border-b border-green-700">
           {location && <div className="flex items-center gap-1 text-xs text-green-300 mb-2"><span>📍</span><span>{location.name}</span></div>}
-          {weatherLoad && <div className="text-xs text-green-400 animate-pulse">আবহাওয়া লোড হচ্ছে...</div>}
+          {weatherLoad && <div className="text-xs text-green-400 animate-pulse">{t.weatherLoading}</div>}
           {weather && !weatherLoad && (
             <div className="bg-green-700/50 rounded-xl p-3">
               <div className="flex items-center justify-between mb-2">
@@ -393,7 +461,7 @@ function ChatApp() {
               </div>
               {weather.farmingAdvice?.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-green-600">
-                  <p className="text-[10px] text-green-400 font-medium mb-1">🌱 আবহাওয়া পরামর্শ:</p>
+                  <p className="text-[10px] text-green-400 font-medium mb-1">{t.weatherAdvice}</p>
                   <p className="text-[10px] text-green-200 leading-relaxed">{weather.farmingAdvice[0]}</p>
                 </div>
               )}
@@ -402,15 +470,15 @@ function ChatApp() {
         </div>
 
         <div className="p-3">
-          <button onClick={() => { setMessages([{ id:Date.now(), role:'bot', text: WELCOME[chatType], tips:[], followUp:[], category:'other' }]); setSidebarOpen(false); }}
+          <button onClick={() => { setMessages([{ id:Date.now(), role:'bot', text: t.welcome, tips:[], followUp:[], category:'other' }]); setSidebarOpen(false); }}
             className="w-full bg-green-600 hover:bg-green-500 text-white text-sm py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
-            <span>✏️</span> নতুন চ্যাট
+            <span>✏️</span> {t.newChat}
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-3">
-          <p className="text-xs text-green-400 font-medium mb-2 uppercase tracking-wide">সাম্প্রতিক প্রশ্ন</p>
-          {history.length === 0 && <p className="text-xs text-green-500 italic">কোনো ইতিহাস নেই</p>}
+          <p className="text-xs text-green-400 font-medium mb-2 uppercase tracking-wide">{t.recentQ}</p>
+          {history.length === 0 && <p className="text-xs text-green-500 italic">{t.noHistory}</p>}
           {history.slice(0,20).map((h, i) => (
             <button key={i} onClick={() => { sendMessage(h.q); setSidebarOpen(false); }}
               className="w-full text-left text-xs text-green-200 hover:text-white hover:bg-green-700 rounded-lg px-3 py-2 mb-1 truncate transition-colors">
@@ -423,23 +491,23 @@ function ChatApp() {
           <a href={AGRO_MAIN_URL}
             className="flex items-center gap-2 w-full text-xs text-green-300 hover:text-white hover:bg-green-700/60 rounded-lg px-3 py-2 mb-1 transition-colors">
             <svg className="h-4 w-4 flex-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-            হোম — agro.com.bd
+            {t.homeLink}
           </a>
           <button
             onClick={() => { localStorage.removeItem('agro_ai_token'); window.location.reload(); }}
             className="flex items-center gap-2 w-full text-left text-xs text-green-300 hover:text-white hover:bg-red-900/40 rounded-lg px-3 py-2 mb-2 transition-colors">
             <svg className="h-4 w-4 flex-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-            লগআউট
+            {t.logout}
           </button>
           <div className="bg-green-700/50 rounded-lg p-3">
             <div className="flex justify-between text-xs text-green-300 mb-1">
-              <span>আজকের প্রশ্ন</span>
+              <span>{t.todayQ}</span>
               <span className={remaining <= 3 ? 'text-red-300 font-bold' : 'text-white font-bold'}>{15 - Math.min(remaining,15)}/15</span>
             </div>
             <div className="h-1.5 bg-green-900 rounded-full overflow-hidden">
               <div className={`h-full ${barColor} rounded-full transition-all`} style={{ width: `${pct}%` }} />
             </div>
-            {limitInfo.isBonus && <p className="text-[10px] text-yellow-300 mt-1">⭐ বোনাস মোড: {remaining} প্রশ্ন বাকি</p>}
+            {limitInfo.isBonus && <p className="text-[10px] text-yellow-300 mt-1">{t.bonusMode(remaining)}</p>}
           </div>
           <p className="text-[10px] text-green-500 text-center mt-2">© agro.com.bd</p>
         </div>
@@ -459,21 +527,24 @@ function ChatApp() {
               <a href={AGRO_MAIN_URL} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors" title="Home">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               </a>
-              <button onClick={() => setLang(l => l === 'bn' ? 'en' : 'bn')} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors" title="Toggle language">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+              <button onClick={() => setLang(l => l === 'bn' ? 'en' : 'bn')}
+                className="inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/10 px-2.5 h-8 text-xs font-bold text-white hover:bg-white/20 hover:border-white/50 transition-colors"
+                title={lang === 'bn' ? 'Switch to English' : 'বাংলায় পরিবর্তন করুন'}>
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span>{t.langSwitch}</span>
               </button>
               <button onClick={() => { localStorage.removeItem('agro_ai_token'); window.location.reload(); }} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors" title="Logout">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               </button>
             </div>
             <div className="text-right text-xs">
-              <div className="text-green-200">{limitInfo.isBonus ? '⭐ বোনাস' : 'প্রশ্ন বাকি'}</div>
+              <div className="text-green-200">{limitInfo.isBonus ? t.bonusLabel : t.qLeft}</div>
               <div className={`font-bold text-lg leading-none ${remaining <= 3 ? 'text-red-300' : ''}`}>{remaining}</div>
             </div>
           </div>
           <div className="px-4 pb-1"><div className="h-0.5 bg-white/20 rounded-full overflow-hidden"><div className={`h-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} /></div></div>
           <div className="flex gap-2 px-4 pb-2">
-            <button onClick={() => switchChat('agro')} className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${chatType==='agro' ? 'bg-white text-green-700 shadow' : 'bg-white/20 hover:bg-white/30'}`}>🌱 কৃষি পরামর্শ</button>
+            <button onClick={() => switchChat('agro')} className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${chatType==='agro' ? 'bg-white text-green-700 shadow' : 'bg-white/20 hover:bg-white/30'}`}>{t.farmingTab}</button>
           </div>
         </header>
 
@@ -482,34 +553,34 @@ function ChatApp() {
             <div key={msg.id} className={`flex ${msg.role==='user' ? 'justify-end' : 'justify-start'}`}>
               {msg.role === 'bot' ? (
                 <div className="max-w-[95%] w-full flex flex-col gap-2">
-                  {msg.bonusJustGiven && <div className="bg-yellow-50 border border-yellow-300 rounded-xl px-3 py-2 text-xs text-yellow-800 font-medium text-center">🎁 ১৫টি প্রশ্ন শেষ! আরও ৫টি বোনাস পেয়েছেন।</div>}
-                  {msg.nearLimit && !msg.bonusJustGiven && <div className="bg-orange-50 border border-orange-200 rounded-xl px-3 py-2 text-xs text-orange-700 text-center">⚠️ মাত্র {remaining}টি প্রশ্ন বাকি।</div>}
+                  {msg.bonusJustGiven && <div className="bg-yellow-50 border border-yellow-300 rounded-xl px-3 py-2 text-xs text-yellow-800 font-medium text-center">{t.bonusGiven}</div>}
+                  {msg.nearLimit && !msg.bonusJustGiven && <div className="bg-orange-50 border border-orange-200 rounded-xl px-3 py-2 text-xs text-orange-700 text-center">{t.nearLimit(remaining)}</div>}
                   <div className={`rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border ${msg.limitHit ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
                     {msg.category && msg.category !== 'other' && (
                       <div className="flex items-center gap-1 mb-2 text-xs text-green-700 font-medium">
                         <span>{CAT_ICON[msg.category]||'🌱'}</span><span className="capitalize">{msg.category}</span>
-                        {msg.cached && <span className="ml-auto text-gray-400 text-[10px]">⚡ ক্যাশ</span>}
-                        {msg.fromDeviceCache && <span className="ml-auto text-blue-400 text-[10px]">📱 ডিভাইস</span>}
+                        {msg.cached && <span className="ml-auto text-gray-400 text-[10px]">{t.cacheLabel}</span>}
+                        {msg.fromDeviceCache && <span className="ml-auto text-blue-400 text-[10px]">{t.deviceCache}</span>}
                       </div>
                     )}
                     <p className="text-gray-800 text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                   </div>
                   {msg.tips?.length > 0 && (
                     <div className="bg-green-50 border border-green-200 rounded-xl px-3 py-2">
-                      <p className="text-xs font-semibold text-green-700 mb-1">💡 টিপস:</p>
+                      <p className="text-xs font-semibold text-green-700 mb-1">{t.tips}</p>
                       <ul className="space-y-1">{msg.tips.map((t,i) => <li key={i} className="text-xs text-green-800 flex gap-1"><span className="text-green-500 mt-0.5 flex-none">✓</span><span>{t}</span></li>)}</ul>
                     </div>
                   )}
-                  {msg.loadingExtras && <div className="animate-pulse bg-gray-100 rounded-xl h-16 flex items-center justify-center"><span className="text-xs text-gray-400">পণ্য ও সেবা খুঁজছি...</span></div>}
+                  {msg.loadingExtras && <div className="animate-pulse bg-gray-100 rounded-xl h-16 flex items-center justify-center"><span className="text-xs text-gray-400">{t.loadingExtras}</span></div>}
                   {!msg.loadingExtras && msg.products?.length > 0 && (
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-                      <p className="text-xs font-semibold text-amber-700 mb-2">🛒 agro.com.bd এ পাওয়া যায়:</p>
+                      <p className="text-xs font-semibold text-amber-700 mb-2">{t.foundAt}</p>
                       <div className="flex flex-col gap-2">
                         {msg.products.map((p,i) => (
                           <a key={i} href={`https://agro.com.bd/search?q=${encodeURIComponent(p.searchQuery)}`} target="_blank" rel="noreferrer"
                             className="flex items-center justify-between bg-white border border-amber-200 rounded-lg px-3 py-2 hover:bg-amber-50 transition-colors">
                             <div><div className="text-sm font-medium text-gray-800">{p.name}</div><div className="text-xs text-gray-500">{p.usage}</div></div>
-                            <span className="text-amber-600 text-xs font-medium ml-2 flex-none">দেখুন →</span>
+                            <span className="text-amber-600 text-xs font-medium ml-2 flex-none">{t.viewBtn}</span>
                           </a>
                         ))}
                       </div>
@@ -517,7 +588,7 @@ function ChatApp() {
                   )}
                   {!msg.loadingExtras && msg.services?.length > 0 && (
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-                      <p className="text-xs font-semibold text-blue-700 mb-2">📍 কাছের সরকারি সেবা {location ? `(${location.name})` : ''}:</p>
+                      <p className="text-xs font-semibold text-blue-700 mb-2">{t.nearbyServices} {location ? `(${location.name})` : ''}:</p>
                       <div className="flex flex-col gap-2">
                         {msg.services.slice(0,3).map((s,i) => (
                           <div key={i} className="bg-white border border-blue-100 rounded-lg px-3 py-2">
@@ -534,15 +605,15 @@ function ChatApp() {
                   )}
                   {msg.conversionCTA && (
                     <div className="bg-green-600 rounded-xl px-4 py-3 flex flex-col gap-2">
-                      <p className="text-white text-sm font-semibold">🎉 অর্ডার করতে প্রস্তুত?</p>
-                      {msg.conversionCTA === 'visit_site' && <a href="https://agro.com.bd" target="_blank" rel="noreferrer" className="bg-white text-green-700 text-sm font-bold py-2 rounded-lg text-center">🌐 agro.com.bd এ যান</a>}
-                      {msg.conversionCTA === 'whatsapp' && <a href="https://wa.me/8801XXXXXXXXX" target="_blank" rel="noreferrer" className="bg-white text-green-700 text-sm font-bold py-2 rounded-lg text-center">💬 WhatsApp এ যোগাযোগ</a>}
-                      {msg.conversionCTA === 'call_now' && <a href="tel:+8801XXXXXXXXX" className="bg-white text-green-700 text-sm font-bold py-2 rounded-lg text-center">📞 এখনই কল করুন</a>}
+                      <p className="text-white text-sm font-semibold">{t.readyToOrder}</p>
+                      {msg.conversionCTA === 'visit_site' && <a href="https://agro.com.bd" target="_blank" rel="noreferrer" className="bg-white text-green-700 text-sm font-bold py-2 rounded-lg text-center">{t.visitSite}</a>}
+                      {msg.conversionCTA === 'whatsapp' && <a href="https://wa.me/8801XXXXXXXXX" target="_blank" rel="noreferrer" className="bg-white text-green-700 text-sm font-bold py-2 rounded-lg text-center">{t.whatsapp}</a>}
+                      {msg.conversionCTA === 'call_now' && <a href="tel:+8801XXXXXXXXX" className="bg-white text-green-700 text-sm font-bold py-2 rounded-lg text-center">{t.callNow}</a>}
                     </div>
                   )}
                   {msg.followUp?.length > 0 && !msg.limitHit && (
                     <div className="flex flex-col gap-1">
-                      <p className="text-[11px] text-gray-500 px-1">আরও জানতে:</p>
+                      <p className="text-[11px] text-gray-500 px-1">{t.learnMore}</p>
                       {msg.followUp.map((q,i) => (
                         <button key={i} onClick={() => sendMessage(q)} className="text-left text-xs bg-white border border-green-200 text-green-700 px-3 py-2 rounded-xl hover:bg-green-50 transition-colors shadow-sm">↩ {q}</button>
                       ))}
@@ -570,12 +641,12 @@ function ChatApp() {
           <div className="max-w-3xl mx-auto px-3 pt-2 pb-3">
             {messages.length <= 1 && (
               <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth:'none' }}>
-                {quickQ.map((q,i) => <button key={i} onClick={() => sendMessage(q)} className="flex-none text-xs bg-green-50 border border-green-200 text-green-700 px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-green-100">{q}</button>)}
+                {t.quickQ.map((q,i) => <button key={i} onClick={() => sendMessage(q)} className="flex-none text-xs bg-green-50 border border-green-200 text-green-700 px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-green-100">{q}</button>)}
               </div>
             )}
             <div className="flex gap-2 items-end">
               <textarea ref={textRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKey}
-                placeholder={chatType==='product' ? 'কোন পণ্য দরকার?' : 'আপনার কৃষি প্রশ্ন লিখুন...'}
+                placeholder={t.placeholder}
                 rows={1} className="flex-1 resize-none border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 max-h-28"
                 onInput={e => { e.target.style.height='auto'; e.target.style.height=Math.min(e.target.scrollHeight,112)+'px'; }} />
               <button onClick={() => sendMessage()} disabled={loading || !input.trim()}
