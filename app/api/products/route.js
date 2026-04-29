@@ -76,17 +76,35 @@ Return [] if no relevant products exist on agro.com.bd for this problem.`;
     const clean    = raw.replace(/```json|```/gi,'').trim();
     const products = JSON.parse(clean.startsWith('[') ? clean : '[]');
 
+    // Enrich with real product data from DB
+    let enriched = products;
+    try {
+      enriched = await Promise.all(products.map(async (p) => {
+        const term = p.searchQuery.replace(/[%_]/g, '').trim();
+        const { data: db } = await supabaseAdmin
+          .from('products')
+          .select('id, name_bn, name_en, price, sale_price, images, is_featured, is_flash_sale, created_at')
+          .eq('is_active', true)
+          .eq('is_b2b', false)
+          .or(`name_en.ilike.%${term}%,name_bn.ilike.%${term}%`)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        return { ...p, dbProduct: db || null };
+      }));
+    } catch (_) {}
+
     // Cache
-    if (products.length > 0) {
+    if (enriched.length > 0) {
       await supabaseAdmin.from('products_cache').upsert({
         problem_key: cacheKey,
-        products,
+        products: enriched,
         created_at:  new Date().toISOString(),
         expires_at:  new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       }, { onConflict: 'problem_key' });
     }
 
-    return Response.json({ products, fromCache: false });
+    return Response.json({ products: enriched, fromCache: false });
   } catch (err) {
     console.error('Products error:', err.message);
     return Response.json({ products: [] });

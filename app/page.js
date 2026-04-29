@@ -576,13 +576,61 @@ function ChatApp() {
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
                       <p className="text-xs font-semibold text-amber-700 mb-2">{t.foundAt}</p>
                       <div className="flex flex-col gap-2">
-                        {msg.products.map((p,i) => (
-                          <a key={i} href={`https://agro.com.bd/search?q=${encodeURIComponent(p.searchQuery)}`} target="_blank" rel="noreferrer"
-                            className="flex items-center justify-between bg-white border border-amber-200 rounded-lg px-3 py-2 hover:bg-amber-50 transition-colors">
-                            <div><div className="text-sm font-medium text-gray-800">{p.name}</div><div className="text-xs text-gray-500">{p.usage}</div></div>
-                            <span className="text-amber-600 text-xs font-medium ml-2 flex-none">{t.viewBtn}</span>
-                          </a>
-                        ))}
+                        {msg.products.map((p, i) => {
+                          const db = p.dbProduct;
+                          const href = db?.id ? `${AGRO_MAIN_URL}/shop/${db.id}` : `${AGRO_MAIN_URL}/shop?q=${encodeURIComponent(p.searchQuery)}`;
+                          const displayName = db ? (lang === 'bn' ? (db.name_bn || db.name_en) : (db.name_en || db.name_bn)) : p.name;
+                          const displayPrice = db ? (db.sale_price ?? db.price) : null;
+                          const hasDiscount = db?.sale_price && db.sale_price < db.price;
+                          const discountPct = hasDiscount ? Math.round((1 - db.sale_price / db.price) * 100) : 0;
+                          const isNew = db?.created_at && (Date.now() - new Date(db.created_at).getTime()) < 30 * 24 * 60 * 60 * 1000;
+                          const img = db?.images?.[0];
+                          return (
+                            <a key={i} href={href} target="_blank" rel="noreferrer"
+                              className="flex gap-3 bg-white border border-amber-200 rounded-xl p-2 hover:bg-amber-50 transition-colors">
+                              {/* Image card */}
+                              <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-slate-100">
+                                {img ? (
+                                  <img src={img} alt={displayName} className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-3xl">🌱</div>
+                                )}
+                                {/* Top-left badges */}
+                                <div className="absolute top-1 left-1 flex flex-col gap-0.5">
+                                  {isNew && <span className="bg-blue-500 text-white text-[7px] font-bold px-1 py-0.5 rounded leading-none">🆕</span>}
+                                  {db?.is_featured && <span className="bg-amber-500 text-white text-[7px] font-bold px-1 py-0.5 rounded leading-none">★</span>}
+                                  {db?.is_flash_sale && <span className="bg-red-500 text-white text-[7px] font-bold px-1 py-0.5 rounded leading-none">⚡</span>}
+                                </div>
+                                {/* Top-right trend */}
+                                <div className="absolute top-1 right-1">
+                                  {hasDiscount ? (
+                                    <span className="bg-green-600 text-white text-[7px] font-bold px-1 py-0.5 rounded leading-none">-{discountPct}%</span>
+                                  ) : db?.is_flash_sale ? (
+                                    <span className="text-[10px] leading-none">🔥</span>
+                                  ) : db?.is_featured ? (
+                                    <span className="text-[10px] leading-none">⭐</span>
+                                  ) : null}
+                                </div>
+                                {/* Bottom overlay */}
+                                {db && (
+                                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/75 to-transparent px-1.5 pb-1 pt-3">
+                                    <div className="flex items-center gap-0.5 text-[8px] text-yellow-300">⭐ 4.5</div>
+                                    {displayPrice && <div className="text-[9px] text-white font-bold leading-tight">৳{displayPrice}</div>}
+                                    <div className="text-[8px] text-white text-center font-medium truncate mt-0.5">{displayName}</div>
+                                  </div>
+                                )}
+                              </div>
+                              {/* Right: AI text */}
+                              <div className="flex-1 min-w-0 flex flex-col justify-between">
+                                <div>
+                                  <div className="text-sm font-semibold text-gray-800 leading-snug">{p.name}</div>
+                                  <div className="text-xs text-gray-500 mt-1 leading-relaxed">{p.usage}</div>
+                                </div>
+                                <span className="text-amber-600 text-xs font-semibold mt-1">{t.viewBtn}</span>
+                              </div>
+                            </a>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -615,7 +663,8 @@ function ChatApp() {
                     <div className="flex flex-col gap-1">
                       <p className="text-[11px] text-gray-500 px-1">{t.learnMore}</p>
                       {msg.followUp.map((q,i) => (
-                        <button key={i} onClick={() => sendMessage(q)} className="text-left text-xs bg-white border border-green-200 text-green-700 px-3 py-2 rounded-xl hover:bg-green-50 transition-colors shadow-sm">↩ {q}</button>
+                        <button key={i} onClick={() => { setInput(q); setTimeout(() => textRef.current?.focus(), 0); }}
+                          className="text-left text-xs bg-white border border-green-200 text-green-700 px-3 py-2 rounded-xl hover:bg-green-50 transition-colors shadow-sm">↳ {q}</button>
                       ))}
                     </div>
                   )}
