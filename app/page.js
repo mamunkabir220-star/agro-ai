@@ -119,7 +119,7 @@ function AnimatedChatCard() {
         <span className="h-3 w-3 rounded-full bg-red-400" />
         <span className="h-3 w-3 rounded-full bg-yellow-400" />
         <span className="h-3 w-3 rounded-full bg-green-400" />
-        <span className="ml-2 text-xs font-semibold text-white">🌾 Agro Assistant</span>
+        <img src="/logo.png" alt="agro" className="ml-2 h-4 w-auto brightness-0 invert" />
       </div>
       <div className="p-4 space-y-3 min-h-[210px]">
         <div className="flex justify-start">
@@ -177,8 +177,7 @@ function LandingPage() {
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-sm">
         <div className="max-w-5xl mx-auto flex items-center justify-between px-5 py-3">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🌾</span>
-            <span className="text-lg font-extrabold text-green-800">Agro Assistant</span>
+            <img src="/logo.png" alt="agro" className="h-9 w-auto" />
           </div>
           <div className="flex items-center gap-3">
             <a href={AGRO_MAIN_URL + '/login'}
@@ -436,8 +435,8 @@ function ChatApp() {
         <div className="p-4 border-b border-green-700">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-2xl">🌾</span>
-              <div><h1 className="font-bold text-base">Agro Assistant</h1><p className="text-xs text-green-300">agro.com.bd</p></div>
+              <img src="/logo.png" alt="agro" className="h-8 w-auto brightness-0 invert" />
+              <p className="text-xs text-green-300">agro.com.bd</p>
             </div>
             <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-green-300 hover:text-white text-xl">✕</button>
           </div>
@@ -521,8 +520,8 @@ function ChatApp() {
               <span className="w-5 h-0.5 bg-white rounded" /><span className="w-5 h-0.5 bg-white rounded" /><span className="w-5 h-0.5 bg-white rounded" />
             </button>
             <div className="flex items-center gap-2 flex-1">
-              <span className="text-xl hidden lg:block">🌾</span>
-              <div><h1 className="text-sm font-bold leading-tight">Agro Assistant</h1>{location && <p className="text-[10px] text-green-200">📍 {location.name}</p>}</div>
+              <img src="/logo.png" alt="agro" className="h-7 w-auto brightness-0 invert hidden lg:block" />
+              <div>{location && <p className="text-[10px] text-green-200">📍 {location.name}</p>}</div>
             </div>
             <div className="flex items-center gap-1">
               <a href={AGRO_MAIN_URL} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors" title="Home">
