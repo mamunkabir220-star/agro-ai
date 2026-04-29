@@ -330,7 +330,21 @@ function ChatApp() {
   const [weather,     setWeather]     = useState(null);
   const [weatherLoad, setWeatherLoad] = useState(false);
   const [lang,        setLang]        = useState('bn');
+  const [darkMode,    setDarkMode]    = useState(false);
   const t = T[lang];
+
+  useEffect(() => {
+    const saved = localStorage.getItem('agro_dark') === '1';
+    setDarkMode(saved);
+    document.documentElement.classList.toggle('dark', saved);
+  }, []);
+
+  function toggleDark() {
+    const next = !darkMode;
+    setDarkMode(next);
+    document.documentElement.classList.toggle('dark', next);
+    localStorage.setItem('agro_dark', next ? '1' : '0');
+  }
 
   const bottomRef = useRef(null);
   const textRef   = useRef(null);
@@ -428,7 +442,7 @@ function ChatApp() {
   const quickQ   = chatType === 'product' ? PRODUCT_QUICK : AGRO_QUICK;
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
       {sidebarOpen && <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       <aside className={`fixed lg:static inset-y-0 left-0 z-40 w-72 bg-gradient-to-b from-green-800 to-green-900 text-white flex flex-col shadow-2xl transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
@@ -533,6 +547,17 @@ function ChatApp() {
                 <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 <span>{t.langSwitch}</span>
               </button>
+              <button onClick={toggleDark} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors" title={darkMode ? 'Light mode' : 'Dark mode'}>
+                {darkMode ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                  </svg>
+                )}
+              </button>
               <button onClick={() => { localStorage.removeItem('agro_ai_token'); window.location.reload(); }} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors" title="Logout">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               </button>
@@ -555,26 +580,26 @@ function ChatApp() {
                 <div className="max-w-[95%] w-full flex flex-col gap-2">
                   {msg.bonusJustGiven && <div className="bg-yellow-50 border border-yellow-300 rounded-xl px-3 py-2 text-xs text-yellow-800 font-medium text-center">{t.bonusGiven}</div>}
                   {msg.nearLimit && !msg.bonusJustGiven && <div className="bg-orange-50 border border-orange-200 rounded-xl px-3 py-2 text-xs text-orange-700 text-center">{t.nearLimit(remaining)}</div>}
-                  <div className={`rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border ${msg.limitHit ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'}`}>
+                  <div className={`rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border ${msg.limitHit ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'}`}>
                     {msg.category && msg.category !== 'other' && (
-                      <div className="flex items-center gap-1 mb-2 text-xs text-green-700 font-medium">
+                      <div className="flex items-center gap-1 mb-2 text-xs text-green-700 dark:text-green-400 font-medium">
                         <span>{CAT_ICON[msg.category]||'🌱'}</span><span className="capitalize">{msg.category}</span>
-                        {msg.cached && <span className="ml-auto text-gray-400 text-[10px]">{t.cacheLabel}</span>}
+                        {msg.cached && <span className="ml-auto text-gray-400 dark:text-gray-500 text-[10px]">{t.cacheLabel}</span>}
                         {msg.fromDeviceCache && <span className="ml-auto text-blue-400 text-[10px]">{t.deviceCache}</span>}
                       </div>
                     )}
-                    <p className="text-gray-800 text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                    <p className="text-gray-800 dark:text-gray-100 text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                   </div>
                   {msg.tips?.length > 0 && (
-                    <div className="bg-green-50 border border-green-200 rounded-xl px-3 py-2">
-                      <p className="text-xs font-semibold text-green-700 mb-1">{t.tips}</p>
-                      <ul className="space-y-1">{msg.tips.map((t,i) => <li key={i} className="text-xs text-green-800 flex gap-1"><span className="text-green-500 mt-0.5 flex-none">✓</span><span>{t}</span></li>)}</ul>
+                    <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl px-3 py-2">
+                      <p className="text-xs font-semibold text-green-700 dark:text-green-400 mb-1">{t.tips}</p>
+                      <ul className="space-y-1">{msg.tips.map((t,i) => <li key={i} className="text-xs text-green-800 dark:text-green-300 flex gap-1"><span className="text-green-500 mt-0.5 flex-none">✓</span><span>{t}</span></li>)}</ul>
                     </div>
                   )}
-                  {msg.loadingExtras && <div className="animate-pulse bg-gray-100 rounded-xl h-16 flex items-center justify-center"><span className="text-xs text-gray-400">{t.loadingExtras}</span></div>}
+                  {msg.loadingExtras && <div className="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl h-16 flex items-center justify-center"><span className="text-xs text-gray-400 dark:text-gray-500">{t.loadingExtras}</span></div>}
                   {!msg.loadingExtras && msg.products?.length > 0 && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-                      <p className="text-xs font-semibold text-amber-700 mb-2">{t.foundAt}</p>
+                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
+                      <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-2">{t.foundAt}</p>
                       <div className="flex flex-col gap-2">
                         {msg.products.map((p, i) => {
                           const db = p.dbProduct;
@@ -587,7 +612,7 @@ function ChatApp() {
                           const img = db?.images?.[0];
                           return (
                             <a key={i} href={href}
-                              className="flex gap-3 bg-white border border-amber-200 rounded-xl p-2 hover:bg-amber-50 transition-colors">
+                              className="flex gap-3 bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-800 rounded-xl p-2 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors">
                               {/* Image card */}
                               <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-slate-100">
                                 {img ? (
@@ -623,10 +648,10 @@ function ChatApp() {
                               {/* Right: AI text */}
                               <div className="flex-1 min-w-0 flex flex-col justify-between">
                                 <div>
-                                  <div className="text-sm font-semibold text-gray-800 leading-snug">{p.name}</div>
-                                  <div className="text-xs text-gray-500 mt-1 leading-relaxed">{p.usage}</div>
+                                  <div className="text-sm font-semibold text-gray-800 dark:text-gray-100 leading-snug">{p.name}</div>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{p.usage}</div>
                                 </div>
-                                <span className="text-amber-600 text-xs font-semibold mt-1">{t.viewBtn}</span>
+                                <span className="text-amber-600 dark:text-amber-400 text-xs font-semibold mt-1">{t.viewBtn}</span>
                               </div>
                             </a>
                           );
@@ -635,13 +660,13 @@ function ChatApp() {
                     </div>
                   )}
                   {!msg.loadingExtras && msg.services?.length > 0 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-                      <p className="text-xs font-semibold text-blue-700 mb-2">{t.nearbyServices} {location ? `(${location.name})` : ''}:</p>
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-3">
+                      <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">{t.nearbyServices} {location ? `(${location.name})` : ''}:</p>
                       <div className="flex flex-col gap-2">
                         {msg.services.slice(0,3).map((s,i) => (
-                          <div key={i} className="bg-white border border-blue-100 rounded-lg px-3 py-2">
-                            <div className="text-sm font-medium text-gray-800">{s.name}</div>
-                            <div className="text-xs text-gray-500 mt-0.5">{s.address}</div>
+                          <div key={i} className="bg-white dark:bg-gray-800 border border-blue-100 dark:border-blue-900 rounded-lg px-3 py-2">
+                            <div className="text-sm font-medium text-gray-800 dark:text-gray-100">{s.name}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{s.address}</div>
                             <div className="flex items-center gap-3 mt-1">
                               <a href={`tel:${s.phone}`} className="text-xs text-blue-600 font-medium flex items-center gap-1 hover:underline">📞 {s.phone}</a>
                               {s.hours && <span className="text-xs text-gray-400">{s.hours}</span>}
@@ -661,10 +686,10 @@ function ChatApp() {
                   )}
                   {msg.followUp?.length > 0 && !msg.limitHit && (
                     <div className="flex flex-col gap-1">
-                      <p className="text-[11px] text-gray-500 px-1">{t.learnMore}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 px-1">{t.learnMore}</p>
                       {msg.followUp.map((q,i) => (
                         <button key={i} onClick={() => { setInput(q); setTimeout(() => textRef.current?.focus(), 0); }}
-                          className="text-left text-xs bg-white border border-green-200 text-green-700 px-3 py-2 rounded-xl hover:bg-green-50 transition-colors shadow-sm">↳ {q}</button>
+                          className="text-left text-xs bg-white dark:bg-gray-800 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-3 py-2 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors shadow-sm">↳ {q}</button>
                       ))}
                     </div>
                   )}
@@ -678,7 +703,7 @@ function ChatApp() {
           ))}
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100 flex gap-1 items-center">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100 dark:border-gray-700 flex gap-1 items-center">
                 {[0,150,300].map(d => <span key={d} className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay:`${d}ms` }} />)}
               </div>
             </div>
@@ -686,24 +711,24 @@ function ChatApp() {
           <div ref={bottomRef} />
         </main>
 
-        <div className="fixed bottom-0 right-0 left-0 lg:left-72 bg-white border-t border-gray-200 shadow-lg z-10">
+        <div className="fixed bottom-0 right-0 left-0 lg:left-72 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-10">
           <div className="max-w-3xl mx-auto px-3 pt-2 pb-3">
             {messages.length <= 1 && (
               <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth:'none' }}>
-                {t.quickQ.map((q,i) => <button key={i} onClick={() => sendMessage(q)} className="flex-none text-xs bg-green-50 border border-green-200 text-green-700 px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-green-100">{q}</button>)}
+                {t.quickQ.map((q,i) => <button key={i} onClick={() => sendMessage(q)} className="flex-none text-xs bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-green-100 dark:hover:bg-green-900/50">{q}</button>)}
               </div>
             )}
             <div className="flex gap-2 items-end">
               <textarea ref={textRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKey}
                 placeholder={t.placeholder}
-                rows={1} className="flex-1 resize-none border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 max-h-28"
+                rows={1} className="flex-1 resize-none border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 max-h-28"
                 onInput={e => { e.target.style.height='auto'; e.target.style.height=Math.min(e.target.scrollHeight,112)+'px'; }} />
               <button onClick={() => sendMessage()} disabled={loading || !input.trim()}
-                className="px-4 py-2.5 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex-none">
+                className="px-4 py-2.5 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors flex-none">
                 {loading ? '⏳' : '➤'}
               </button>
             </div>
-            <p className="text-[10px] text-gray-400 text-center mt-1">{chatType==='product' ? '🛒 পণ্য কিনুন — agro.com.bd' : '🌱 Agro Assistant — agro.com.bd'}</p>
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-1">{chatType==='product' ? '🛒 পণ্য কিনুন — agro.com.bd' : '🌱 Agro Assistant — agro.com.bd'}</p>
           </div>
         </div>
       </div>
