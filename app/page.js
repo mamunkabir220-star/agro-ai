@@ -383,9 +383,10 @@ function ChatApp() {
         { id: Date.now(), role: 'user', text: q },
         { id: Date.now()+1, role: 'bot', text: histMatch.answer + '\n\n_(ডিভাইস ক্যাশ থেকে)_', tips: [], followUp: [], category: 'other', fromDeviceCache: true }
       ]);
+    } else {
+      setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: q }]);
+      setLoading(true);
     }
-    setMessages(prev => [...prev, { id: Date.now() + (histMatch ? 2 : 0), role: 'user', text: q }]);
-    if (!histMatch) setLoading(true);
 
     try {
       const uid = getOrCreateUserId();
@@ -586,7 +587,7 @@ function ChatApp() {
                           const isNew = db?.created_at && (Date.now() - new Date(db.created_at).getTime()) < 30 * 24 * 60 * 60 * 1000;
                           const img = db?.images?.[0];
                           return (
-                            <a key={i} href={href} target="_blank" rel="noreferrer"
+                            <a key={i} href={href}
                               className="flex gap-3 bg-white border border-amber-200 rounded-xl p-2 hover:bg-amber-50 transition-colors">
                               {/* Image card */}
                               <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-slate-100">
