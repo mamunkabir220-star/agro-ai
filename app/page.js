@@ -42,8 +42,8 @@ function saveHistory(q, answer) {
 function searchHistory(q) {
   try {
     const h = loadHistory();
-    const words = q.toLowerCase().split(' ').filter(w => w.length > 2);
-    return h.find(e => words.some(w => e.q.toLowerCase().includes(w)));
+    const normalized = q.trim().toLowerCase();
+    return h.find(e => e.q.trim().toLowerCase() === normalized);
   } catch { return null; }
 }
 
