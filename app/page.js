@@ -329,7 +329,10 @@ function ChatApp() {
   const [location,    setLocation]    = useState(null);
   const [weather,     setWeather]     = useState(null);
   const [weatherLoad, setWeatherLoad] = useState(false);
-  const [lang,        setLang]        = useState('bn');
+  const [lang,        setLang]        = useState(() => {
+    if (typeof window === 'undefined') return 'bn';
+    try { return localStorage.getItem('agro_lang') || 'bn'; } catch { return 'bn'; }
+  });
   const [darkMode,    setDarkMode]    = useState(false);
   const t = T[lang];
 
@@ -439,7 +442,6 @@ function ChatApp() {
 
   const pct      = Math.round(((15 - Math.min(remaining, 15)) / 15) * 100);
   const barColor = remaining <= 3 ? 'bg-red-500' : remaining <= 7 ? 'bg-yellow-400' : 'bg-green-400';
-  const quickQ   = chatType === 'product' ? PRODUCT_QUICK : AGRO_QUICK;
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
@@ -541,7 +543,13 @@ function ChatApp() {
               <a href={AGRO_MAIN_URL} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors" title="Home">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               </a>
-              <button onClick={() => setLang(l => l === 'bn' ? 'en' : 'bn')}
+              <button onClick={() => setLang(l => {
+                const next = l === 'bn' ? 'en' : 'bn';
+                try { localStorage.setItem('agro_lang', next); } catch {}
+                setMessages(prev => prev.length === 1 && prev[0].role === 'bot'
+                  ? [{ ...prev[0], text: T[next].welcome }] : prev);
+                return next;
+              })}
                 className="inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/10 px-2.5 h-8 text-xs font-bold text-white hover:bg-white/20 hover:border-white/50 transition-colors"
                 title={lang === 'bn' ? 'Switch to English' : 'বাংলায় পরিবর্তন করুন'}>
                 <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -758,29 +766,17 @@ export default function Home() {
 
       // 2. Verify the token with agro.com.bd
       try {
-        // #region agent log
-        fetch('http://127.0.0.1:7255/ingest/2b0d3bde-aa46-445a-b687-415a74498d9f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f7279'},body:JSON.stringify({sessionId:'0f7279',runId:'pre-fix',hypothesisId:'H5',location:'agro-ai/app/page.js:761',message:'Assistant token verify request target',data:{authVerifyUrl:AUTH_VERIFY_URL,mainUrl:AGRO_MAIN_URL,hasToken:!!token,origin:window.location.origin},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         const res = await fetch(AUTH_VERIFY_URL, {
           headers: { Authorization: 'Bearer ' + token },
         });
         if (res.ok) {
-          // #region agent log
-          fetch('http://127.0.0.1:7255/ingest/2b0d3bde-aa46-445a-b687-415a74498d9f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f7279'},body:JSON.stringify({sessionId:'0f7279',runId:'pre-fix',hypothesisId:'H5',location:'agro-ai/app/page.js:765',message:'Assistant token verify success',data:{status:res.status},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
           setView('chat');
         } else {
-          // #region agent log
-          fetch('http://127.0.0.1:7255/ingest/2b0d3bde-aa46-445a-b687-415a74498d9f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f7279'},body:JSON.stringify({sessionId:'0f7279',runId:'pre-fix',hypothesisId:'H5',location:'agro-ai/app/page.js:768',message:'Assistant token verify failed',data:{status:res.status},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
           localStorage.removeItem('agro_ai_token');
           setView('landing');
         }
       } catch {
         // Network/CORS error — show chat anyway so users aren't blocked
-        // #region agent log
-        fetch('http://127.0.0.1:7255/ingest/2b0d3bde-aa46-445a-b687-415a74498d9f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f7279'},body:JSON.stringify({sessionId:'0f7279',runId:'pre-fix',hypothesisId:'H5',location:'agro-ai/app/page.js:772',message:'Assistant token verify network/cors fallback',data:{authVerifyUrl:AUTH_VERIFY_URL},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         setView('chat');
       }
     }
