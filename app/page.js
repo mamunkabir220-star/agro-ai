@@ -1,8 +1,8 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
 
-const AUTH_VERIFY_URL = 'https://agro-com-bd.vercel.app/agro-assistant/api/auth/me';
-const AGRO_MAIN_URL   = 'https://agro-com-bd.vercel.app';
+const AUTH_VERIFY_URL = 'https://agro.com.bd/agro-assistant/api/auth/me';
+const AGRO_MAIN_URL   = 'https://agro.com.bd';
 
 // ── Weather code → icon + label ──
 function weatherIcon(code) {
@@ -758,17 +758,29 @@ export default function Home() {
 
       // 2. Verify the token with agro.com.bd
       try {
+        // #region agent log
+        fetch('http://127.0.0.1:7255/ingest/2b0d3bde-aa46-445a-b687-415a74498d9f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f7279'},body:JSON.stringify({sessionId:'0f7279',runId:'pre-fix',hypothesisId:'H5',location:'agro-ai/app/page.js:761',message:'Assistant token verify request target',data:{authVerifyUrl:AUTH_VERIFY_URL,mainUrl:AGRO_MAIN_URL,hasToken:!!token,origin:window.location.origin},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         const res = await fetch(AUTH_VERIFY_URL, {
           headers: { Authorization: 'Bearer ' + token },
         });
         if (res.ok) {
+          // #region agent log
+          fetch('http://127.0.0.1:7255/ingest/2b0d3bde-aa46-445a-b687-415a74498d9f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f7279'},body:JSON.stringify({sessionId:'0f7279',runId:'pre-fix',hypothesisId:'H5',location:'agro-ai/app/page.js:765',message:'Assistant token verify success',data:{status:res.status},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
           setView('chat');
         } else {
+          // #region agent log
+          fetch('http://127.0.0.1:7255/ingest/2b0d3bde-aa46-445a-b687-415a74498d9f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f7279'},body:JSON.stringify({sessionId:'0f7279',runId:'pre-fix',hypothesisId:'H5',location:'agro-ai/app/page.js:768',message:'Assistant token verify failed',data:{status:res.status},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
           localStorage.removeItem('agro_ai_token');
           setView('landing');
         }
       } catch {
         // Network/CORS error — show chat anyway so users aren't blocked
+        // #region agent log
+        fetch('http://127.0.0.1:7255/ingest/2b0d3bde-aa46-445a-b687-415a74498d9f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0f7279'},body:JSON.stringify({sessionId:'0f7279',runId:'pre-fix',hypothesisId:'H5',location:'agro-ai/app/page.js:772',message:'Assistant token verify network/cors fallback',data:{authVerifyUrl:AUTH_VERIFY_URL},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         setView('chat');
       }
     }
