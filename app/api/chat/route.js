@@ -1,5 +1,5 @@
 /**
- * AgroBot Chat API — POST /api/chat
+ * Agro Assistant Chat API — POST /api/chat
  * Handles both chatType: 'agro' and chatType: 'product'
  */
 import 'server-only';
@@ -33,7 +33,7 @@ export async function POST(request) {
     if (!global.allowed) {
       return Response.json({
         success:  false,
-        response: '🌾 আজকের জন্য AgroBot বন্ধ আছে। আগামীকাল আবার আসুন। / AgroBot is at capacity for today. Please come back tomorrow.',
+        response: '🌾 আজকের জন্য Agro Assistant বন্ধ আছে। আগামীকাল আবার আসুন। / Agro Assistant is at capacity for today. Please come back tomorrow.',
         reason:   'global_limit',
       }, { status: 429 });
     }
@@ -119,5 +119,5 @@ export async function POST(request) {
 }
 
 export async function GET() {
-  return Response.json({ status: 'ok', service: 'AgroBot AI', version: '3.0.0' });
+  return Response.json({ status: 'ok', service: 'Agro Assistant', version: '3.0.0' });
 }
