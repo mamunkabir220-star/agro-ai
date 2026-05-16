@@ -205,6 +205,11 @@ function LandingPage() {
         {/* Animated chat demo */}
         <AnimatedChatCard />
 
+        {/* AI Disclaimer */}
+        <p className="mt-3 mb-3 text-[11px] leading-relaxed text-gray-400 max-w-sm mx-auto text-center px-2">
+          &#9888;&#65039; Agro Assistant is an AI-powered advisory tool and may occasionally provide inaccurate or incomplete information. Always verify advice and consult a qualified, government-certified specialist before implementation.
+        </p>
+
         <p className="text-sm text-gray-500 mb-8">
           ফসল, পশু, মাছ, সার, রোগ — যেকোনো কৃষি সমস্যায় তাৎক্ষণিক বিশেষজ্ঞ পরামর্শ পান। বাংলা ও ইংরেজিতে।
         </p>
@@ -737,6 +742,9 @@ function ChatApp() {
               </button>
             </div>
             <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-1">{chatType==='product' ? '🛒 পণ্য কিনুন — agro.com.bd' : '🌱 Agro Assistant — agro.com.bd'}</p>
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-0.5 leading-relaxed px-1">
+              &#9888; AI advice may be inaccurate. Verify independently and consult a licensed veterinarian, agricultural extension officer, or crop protection advisor before implementing any recommendations.
+            </p>
           </div>
         </div>
       </div>
