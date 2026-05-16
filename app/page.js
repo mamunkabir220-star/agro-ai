@@ -34,7 +34,7 @@ function loadHistory() {
 function saveHistory(q, answer) {
   try {
     const h = loadHistory();
-    const entry = { q, answer: answer.slice(0,120), ts: Date.now() };
+    const entry = { q, answer: answer.slice(0,3000), ts: Date.now() };
     const updated = [entry, ...h.filter(e => e.q !== q)].slice(0, 50);
     localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
   } catch {}
@@ -501,7 +501,13 @@ function ChatApp() {
           <p className="text-xs text-green-400 font-medium mb-2 uppercase tracking-wide">{t.recentQ}</p>
           {history.length === 0 && <p className="text-xs text-green-500 italic">{t.noHistory}</p>}
           {history.slice(0,20).map((h, i) => (
-            <button key={i} onClick={() => { sendMessage(h.q); setSidebarOpen(false); }}
+            <button key={i} onClick={() => {
+              const welcome = { id: 1, role: 'bot', text: WELCOME[chatType] || WELCOME.agro, tips: [], followUp: [], category: 'other' };
+              const uMsg = { id: 2, role: 'user', text: h.q };
+              const bMsg = { id: 3, role: 'bot', text: h.answer, tips: [], followUp: [], category: 'other', fromHistory: true };
+              setMessages([welcome, uMsg, bMsg]);
+              setSidebarOpen(false);
+            }}
               className="w-full text-left text-xs text-green-200 hover:text-white hover:bg-green-700 rounded-lg px-3 py-2 mb-1 truncate transition-colors">
               💬 {h.q}
             </button>
