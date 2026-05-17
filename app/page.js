@@ -34,7 +34,7 @@ function loadHistory() {
 function saveHistory(q, answer) {
   try {
     const h = loadHistory();
-    const entry = { q, answer: answer.slice(0,120), ts: Date.now() };
+    const entry = { q, answer: answer.slice(0,3000), ts: Date.now() };
     const updated = [entry, ...h.filter(e => e.q !== q)].slice(0, 50);
     localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
   } catch {}
@@ -204,6 +204,11 @@ function LandingPage() {
 
         {/* Animated chat demo */}
         <AnimatedChatCard />
+
+        {/* AI Disclaimer */}
+        <p className="mt-3 mb-3 text-[11px] leading-relaxed text-gray-400 max-w-sm mx-auto text-center px-2">
+          &#9888;&#65039; Agro Assistant is an AI-powered advisory tool and may occasionally provide inaccurate or incomplete information. Always verify advice and consult a qualified, government-certified specialist before implementation.
+        </p>
 
         <p className="text-sm text-gray-500 mb-8">
           ফসল, পশু, মাছ, সার, রোগ — যেকোনো কৃষি সমস্যায় তাৎক্ষণিক বিশেষজ্ঞ পরামর্শ পান। বাংলা ও ইংরেজিতে।
@@ -498,7 +503,13 @@ function ChatApp() {
           <p className="text-xs text-green-400 font-medium mb-2 uppercase tracking-wide">{t.recentQ}</p>
           {history.length === 0 && <p className="text-xs text-green-500 italic">{t.noHistory}</p>}
           {history.slice(0,20).map((h, i) => (
-            <button key={i} onClick={() => { sendMessage(h.q); setSidebarOpen(false); }}
+            <button key={i} onClick={() => {
+              const welcome = { id: 1, role: 'bot', text: WELCOME[chatType] || WELCOME.agro, tips: [], followUp: [], category: 'other' };
+              const uMsg = { id: 2, role: 'user', text: h.q };
+              const bMsg = { id: 3, role: 'bot', text: h.answer, tips: [], followUp: [], category: 'other', fromHistory: true };
+              setMessages([welcome, uMsg, bMsg]);
+              setSidebarOpen(false);
+            }}
               className="w-full text-left text-xs text-green-200 hover:text-white hover:bg-green-700 rounded-lg px-3 py-2 mb-1 truncate transition-colors">
               💬 {h.q}
             </button>
@@ -753,6 +764,9 @@ function ChatApp() {
                   Agro Assistant — agro.com.bd
                 </>
               )}
+            </p>
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-0.5 leading-relaxed px-1">
+              &#9888; AI advice may be inaccurate. Verify independently and consult a licensed veterinarian, agricultural extension officer, or crop protection advisor before implementing any recommendations.
             </p>
           </div>
         </div>
