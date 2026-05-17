@@ -55,7 +55,7 @@ function getOrCreateUserId() {
 }
 
 const WELCOME = {
-  agro:    '🌾 আসসালামু আলাইকুম! আমি Agro Assistant।\n\nফসল, গাছপালা, পশু, মাছ, সার, রোগ, আবহাওয়া — যেকোনো কৃষি প্রশ্ন করুন।',
+  agro:    'আসসালামু আলাইকুম! আমি Agro Assistant।\n\nফসল, গাছপালা, পশু, মাছ, সার, রোগ, আবহাওয়া — যেকোনো কৃষি প্রশ্ন করুন।',
   product: '🛒 আমি Agro Assistant সেলস অ্যাসিস্ট্যান্ট!\n\nagro.com.bd থেকে সেরা কৃষি পণ্য খুঁজে পেতে সাহায্য করব।',
 };
 
@@ -241,7 +241,9 @@ function LoadingScreen() {
   return (
     <div className="min-h-screen bg-green-50 flex items-center justify-center">
       <div className="text-center">
-        <div className="text-5xl mb-4" style={{ animation: 'spin 1.5s linear infinite', display: 'inline-block' }}>🌾</div>
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-green-600 shadow-lg" style={{ animation: 'spin 1.5s linear infinite' }}>
+          <svg viewBox="0 0 24 24" className="h-9 w-9" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6V2H8m7 9v2M2 12h2m16 0h2m-2 4a2 2 0 0 1-2 2H8.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 4 20.286V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2zM9 11v2"/></svg>
+        </div>
         <p className="text-green-700 font-medium">লোড হচ্ছে...</p>
       </div>
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
@@ -262,7 +264,7 @@ const T = {
     bonusMode: (n) => `⭐ বোনাস মোড: ${n} প্রশ্ন বাকি`,
     qLeft: 'প্রশ্ন বাকি',
     bonusLabel: '⭐ বোনাস',
-    farmingTab: '🌱 কৃষি পরামর্শ',
+    farmingTab: 'কৃষি পরামর্শ',
     loadingExtras: 'পণ্য ও সেবা খুঁজছি...',
     tips: '💡 টিপস:',
     foundAt: '🛒 agro.com.bd এ পাওয়া যায়:',
@@ -280,7 +282,7 @@ const T = {
     deviceCache: '📱 ডিভাইস',
     langSwitch: 'EN',
     quickQ: ['ধান চাষে কোন সার দেব?', 'টমেটোতে পোকা দমন?', 'জৈব সার তৈরির উপায়?', 'মাছ চাষে pH কত?'],
-    welcome: '🌾 আসসালামু আলাইকুম! আমি Agro Assistant।\n\nফসল, গাছপালা, পশু, মাছ, সার, রোগ, আবহাওয়া — যেকোনো কৃষি প্রশ্ন করুন।',
+    welcome: 'আসসালামু আলাইকুম! আমি Agro Assistant।\n\nফসল, গাছপালা, পশু, মাছ, সার, রোগ, আবহাওয়া — যেকোনো কৃষি প্রশ্ন করুন।',
   },
   en: {
     newChat: 'New Chat',
@@ -294,7 +296,7 @@ const T = {
     bonusMode: (n) => `⭐ Bonus mode: ${n} left`,
     qLeft: 'left',
     bonusLabel: '⭐ Bonus',
-    farmingTab: '🌱 Farming Advice',
+    farmingTab: 'Farming Advice',
     loadingExtras: 'Finding products & services...',
     tips: '💡 Tips:',
     foundAt: '🛒 Available on agro.com.bd:',
@@ -312,7 +314,7 @@ const T = {
     deviceCache: '📱 Device',
     langSwitch: 'বাং',
     quickQ: ['Best fertilizer for rice?', 'How to control pests in tomato?', 'How to make organic compost?', 'Ideal pH for fish farming?'],
-    welcome: '🌾 Hello! I am Agro Assistant.\n\nAsk me anything about crops, plants, livestock, fish, fertilizers, diseases, or weather.',
+    welcome: 'Hello! I am Agro Assistant.\n\nAsk me anything about crops, plants, livestock, fish, fertilizers, diseases, or weather.',
   },
 };
 
@@ -577,7 +579,10 @@ function ChatApp() {
           </div>
           <div className="px-4 pb-1"><div className="h-0.5 bg-white/20 rounded-full overflow-hidden"><div className={`h-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} /></div></div>
           <div className="flex gap-2 px-4 pb-2">
-            <button onClick={() => switchChat('agro')} className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${chatType==='agro' ? 'bg-white text-green-700 shadow' : 'bg-white/20 hover:bg-white/30'}`}>{t.farmingTab}</button>
+            <button onClick={() => switchChat('agro')} className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${chatType==='agro' ? 'bg-white text-green-700 shadow' : 'bg-white/20 hover:bg-white/30'}`}>
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6V2H8m7 9v2M2 12h2m16 0h2m-2 4a2 2 0 0 1-2 2H8.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 4 20.286V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2zM9 11v2"/></svg>
+              {t.farmingTab}
+            </button>
           </div>
         </header>
 
@@ -589,11 +594,16 @@ function ChatApp() {
                   {msg.bonusJustGiven && <div className="bg-yellow-50 border border-yellow-300 rounded-xl px-3 py-2 text-xs text-yellow-800 font-medium text-center">{t.bonusGiven}</div>}
                   {msg.nearLimit && !msg.bonusJustGiven && <div className="bg-orange-50 border border-orange-200 rounded-xl px-3 py-2 text-xs text-orange-700 text-center">{t.nearLimit(remaining)}</div>}
                   <div className={`rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border ${msg.limitHit ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'}`}>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 flex-shrink-0 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6V2H8m7 9v2M2 12h2m16 0h2m-2 4a2 2 0 0 1-2 2H8.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 4 20.286V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2zM9 11v2"/></svg>
+                      <span className="text-[10px] font-bold text-green-700 dark:text-green-400">Agro Assistant</span>
+                      {msg.category && msg.category !== 'other' && <span className="ml-1 text-[10px] text-green-600 dark:text-green-500 capitalize">· {msg.category}</span>}
+                      {msg.cached && <span className="ml-auto text-gray-400 dark:text-gray-500 text-[10px]">{t.cacheLabel}</span>}
+                      {msg.fromDeviceCache && <span className="ml-auto text-blue-400 text-[10px]">{t.deviceCache}</span>}
+                    </div>
                     {msg.category && msg.category !== 'other' && (
-                      <div className="flex items-center gap-1 mb-2 text-xs text-green-700 dark:text-green-400 font-medium">
+                      <div className="flex items-center gap-1 mb-2 text-xs text-green-700 dark:text-green-400 font-medium" style={{display:'none'}}>
                         <span>{CAT_ICON[msg.category]||'🌱'}</span><span className="capitalize">{msg.category}</span>
-                        {msg.cached && <span className="ml-auto text-gray-400 dark:text-gray-500 text-[10px]">{t.cacheLabel}</span>}
-                        {msg.fromDeviceCache && <span className="ml-auto text-blue-400 text-[10px]">{t.deviceCache}</span>}
                       </div>
                     )}
                     <p className="text-gray-800 dark:text-gray-100 text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
@@ -736,7 +746,14 @@ function ChatApp() {
                 {loading ? '⏳' : '➤'}
               </button>
             </div>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-1">{chatType==='product' ? '🛒 পণ্য কিনুন — agro.com.bd' : '🌱 Agro Assistant — agro.com.bd'}</p>
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-1 flex items-center justify-center gap-1">
+              {chatType==='product' ? '🛒 পণ্য কিনুন — agro.com.bd' : (
+                <>
+                  <svg viewBox="0 0 24 24" className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6V2H8m7 9v2M2 12h2m16 0h2m-2 4a2 2 0 0 1-2 2H8.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 4 20.286V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2zM9 11v2"/></svg>
+                  Agro Assistant — agro.com.bd
+                </>
+              )}
+            </p>
           </div>
         </div>
       </div>
